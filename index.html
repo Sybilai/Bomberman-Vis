@@ -1,0 +1,20 @@
+<html>
+<head>
+<script src="game_rules.js"></script>
+<script src="engine.js"></script>
+<script src="draw.js"></script>
+</head>
+<body id="body">
+</body>
+<script>
+    Draw.init();
+    Engine.initMatrices(13, 11);
+    Engine.addPlayer();
+    Engine.addBomb();
+    setTimeout(function() {
+        Draw.matrices = Engine.matrices;
+        Engine.update();
+    }, 100);
+
+</script>
+</html>
