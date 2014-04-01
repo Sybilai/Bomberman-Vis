@@ -9,12 +9,18 @@
 <script>
     Draw.init();
     Engine.initMatrices(13, 11);
-    Engine.addPlayer();
-    Engine.addBomb();
+
+    new Bomb(1, 1);
+
     setTimeout(function() {
         Draw.matrices = Engine.matrices;
         Engine.update();
-    }, 100);
+   }, 100);
+
+  setTimeout(function() {
+      new Bomb(1, 2);
+      new Player(1, 3);
+      }, 1000);
 
 </script>
 </html>

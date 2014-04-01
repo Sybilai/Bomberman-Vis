@@ -13,6 +13,7 @@ var Draw = {
     },
 
     bomb: new Image(),
+    fire: new Image(),
 
     player: {
       left: new Image(),
@@ -41,6 +42,7 @@ var Draw = {
     Draw.assets.player.none.src = "img/player_front.png";
 
     Draw.assets.bomb.src = "img/bomb.png";
+    Draw.assets.fire.src = "img/fire.png";
 
     body.appendChild( Draw.canvas );
   },
@@ -82,7 +84,14 @@ var Draw = {
                 Draw.assets.blocks.width*i,
                 Draw.assets.blocks.height*j
               );
-             break;
+              break;
+            case "flame":
+              Draw.ctx.drawImage(
+                Draw.assets.fire,
+                Draw.assets.blocks.width*i,
+                Draw.assets.blocks.height*j
+              );
+              break;
           }
         }
 
