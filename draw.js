@@ -81,15 +81,15 @@ var Draw = {
             case "bomb":
               Draw.ctx.drawImage(
                 Draw.assets.bomb,
-                Draw.assets.blocks.width*i,
-                Draw.assets.blocks.height*j
+                Draw.assets.blocks.width*i+8,
+                Draw.assets.blocks.height*j+8
               );
               break;
             case "flame":
               Draw.ctx.drawImage(
                 Draw.assets.fire,
-                Draw.assets.blocks.width*i,
-                Draw.assets.blocks.height*j
+                Draw.assets.blocks.width*i+8,
+                Draw.assets.blocks.height*j+8
               );
               break;
           }
