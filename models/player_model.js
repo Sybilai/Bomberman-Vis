@@ -1,5 +1,6 @@
 function Player(_x, _y) {
   this.isBlocking = false;
+  this.mortal = true;
   this.type = "player";
   this.pos = {
     x: _x,

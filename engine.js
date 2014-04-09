@@ -39,12 +39,9 @@ var Engine = {
   },
 
   update: function () {
-    Engine.updatePlayers();
-    Engine.updateBombs();
-    Engine.updateFlames();
-    ++GameRules.currentFrame;
-    Draw.update();
-    setTimeout(Engine.update, 1000/GameRules.framesPerSecond);
+    if (Engine.players.length) Engine.updatePlayers();
+    if (Engine.bombs.length) Engine.updateBombs();
+    if (Engine.flames.length) Engine.updateFlames();
   },
 
   updatePlayers: function() {
@@ -71,7 +68,7 @@ var Engine = {
       var ct = Engine.matrices[flame.pos.x][flame.pos.y].content;
 
       for (var j = 0; j < ct.length; ++j) {
-        if (!(ct[j].isBlocking === true)) {
+        if (ct[j].mortal === true) {
           if (ct[j].burn) {
             ct[j].burn();
           }
@@ -98,7 +95,7 @@ function move( key ) {
   for (var i = 0, _ilen = Engine[key].length; i < _ilen; ++i) {
     var aux = Engine[key][i];
 
-    if (aux.direction != "none") {
+    if (aux.direction !== "none") {
       var now = GameRules.currentFrame;
       if (now - aux.lastUpdate > GameRules.speed[key]) {
         moveThis( aux );

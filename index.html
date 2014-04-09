@@ -7,6 +7,7 @@
 <script src="game_rules.js"></script>
 <script src="engine.js"></script>
 <script src="draw.js"></script>
+<script src="ticker.js"></script>
 </head>
 <body id="body">
 </body>
@@ -18,13 +19,15 @@
 
     setTimeout(function() {
         Draw.matrices = Engine.matrices;
-        Engine.update();
-   }, 100);
+        Ticker.update();
+    }, 100);
 
-  setTimeout(function() {
-      new Bomb(1, 2);
-      new Player(1, 3);
-      }, 1000);
+    setTimeout(function() {
+      Ticker.queue.push( function() {
+        new Bomb(1, 2);
+        new Player(1, 3);
+      });
+    }, 1000);
 
 </script>
 </html>

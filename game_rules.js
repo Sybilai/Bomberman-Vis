@@ -1,6 +1,5 @@
 var GameRules = {
 
-  bombSpeed: 20,     // frames/block
   bombLife: 120,     // frames
   basicBombRange: 1, //blocks
 

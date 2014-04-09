@@ -1,5 +1,6 @@
 function Bomb(_x, _y) {
   this.isBlocking = "mov";
+  this.mortal = true;
   this.type = "bomb";
   this.pos = {
     x: _x,
