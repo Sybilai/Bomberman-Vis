@@ -110,13 +110,29 @@ function moveThis( aux ) {
   new_pos.x = aux.pos.x + Engine.dir[ aux.direction ].x;
   new_pos.y = aux.pos.y + Engine.dir[ aux.direction ].y;
 
-  if (Engine.matrices[new_pos.x][new_pos.y].isBlocked()) {
-    aux.direction = "none";
-  } else {
-    spliceContent(aux);
-    aux.pos.x = new_pos.x;
-    aux.pos.y = new_pos.y;
-    Engine.matrices[new_pos.x][new_pos.y].content.push(aux);
+  switch (Engine.matrices[new_pos.x][new_pos.y].isBlocked()) {
+    case "mov":
+      if (!aux.isBlocking === false) return;
+      if (aux.powerups) {
+        if (!aux.powerups.canKick) break;
+      }
+
+      for (var i = 0, _ilen = Engine.matrices[new_pos.x][new_pos.y].content.length; i < _ilen; ++i) {
+        var el = Engine.matrices[new_pos.x][new_pos.y].content[i];
+        if (el.isBlocking === "mov") {
+          el.direction = aux.direction;
+        }
+      }
+      break;
+    case true:
+      aux.direction = "none";
+      return;
   }
+  
+  spliceContent(aux);
+  aux.pos.x = new_pos.x;
+  aux.pos.y = new_pos.y;
+  Engine.matrices[new_pos.x][new_pos.y].content.push(aux);
+
 }
 

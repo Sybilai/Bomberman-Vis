@@ -6,8 +6,8 @@ var GameRules = {
   flameLife: 60,
 
   speed: {           // frames/block
-    players: 30,
-    bombs: 20
+    players: 20,
+    bombs: 10
   },
 
   currentFrame: 0,
