@@ -1,33 +1,68 @@
 <html>
 <head>
-<script src="models/block_model.js"></script>
-<script src="models/player_model.js"></script>
-<script src="models/bomb_model.js"></script>
-<script src="models/flame_model.js"></script>
-<script src="game_rules.js"></script>
-<script src="engine.js"></script>
-<script src="draw.js"></script>
-<script src="ticker.js"></script>
+  <script src="draw.js"></script>
 </head>
+
 <body id="body">
 </body>
+
 <script>
-    Draw.init();
-    Engine.initMatrices(13, 11);
+  var ws = new WebSocket('ws://localhost:62421/');
+  var Entities = {};
+  Draw.init();
 
-    new Player(1, 1);
-    new Bomb(1, 2);
+  ws.onmessage = function(res) {
+    messages = res.data;
+    messages = messages.split('\n');
+    messages.pop();
 
-    setTimeout(function() {
-        Draw.matrices = Engine.matrices;
-        Ticker.update();
-    }, 100);
+    while (messages.length) {
+      var v = messages.shift();
 
-    setTimeout(function() {
-      Ticker.queue.push( function() {
-        new Bomb(1, 3);
-//        new Player(1, 3);
-      });
-    }, 1000);
+      try {
+        v = JSON.parse(v);
+      } catch (e) {
+        continue;
+      }
+
+      switch (v.event) {
+        case 'game':
+          Draw.matrices = v.game_state;
+          for (var i = 0, il = Draw.matrices.length; i < il; ++i) {
+            for (var j = 0, jl = Draw.matrices[i].length; j < jl; ++j) {
+              for (var c = 0, cl = Draw.matrices[i][j].content.length; c < cl; ++c) {
+                Entities[ Draw.matrices[i][j].content[c].object_id ] = Draw.matrices[i][j].content[c];
+              }
+            }
+          }
+          Draw.update();
+          break;
+
+        case 'new_entity':
+          Draw.matrices[v.x][v.y].content.push(v.data);
+          Entities[v.data.object_id] = v.data;
+          Draw.update();
+          break;
+
+        case 'destroy_entity':
+          var a = Entities[v.object_id];
+          Draw.matrices[a.pos.x][a.pos.y].content.splice(
+            Draw.matrices[a.pos.x][a.pos.y].content.indexOf(a)
+              ,1);
+          delete Entities[v.object_id];
+          Draw.update();
+          break;
+
+        case 'move_entity':
+          break;
+
+        case 'update_entity':
+          Entities[v.object_id] = v.data;
+          Draw.update();
+          break;
+      }
+    }
+
+  }
 </script>
 </html>
