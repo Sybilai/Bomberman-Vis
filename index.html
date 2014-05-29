@@ -17,17 +17,50 @@ background-size:16px 16px;
       display: block;
       margin: 0 auto;
     }
+    .error {
+      display: none;
+      margin: 0 auto;
+      margin-top: 20px;
+      width: 350px;
+
+      background: rgba(250, 0, 0, 0.4);
+      border: 4px solid rgba(180, 0, 0, 0.8);
+
+      color: white;
+      font-size: 30px;
+      text-align: center;
+      font-weight: bold;
+      font-family: sans-serif;
+      line-height: 1.5;
+      font-size: 18px;
+      padding: 15px 10px;
+    }
+    .error.active {
+      display: block;
+    }
   </style>
 </head>
 
 <body id="body">
-</body>
+  <div class="error">Connection can't be created. This page will refresh.</div>
 
 <script>
   var ws = new WebSocket('ws://localhost:62421/');
   var Entities = {};
 
   Draw.init();
+
+  ws.onopen = function(res) {
+    console.log(res);
+  };
+
+  ws.onclose = function() {
+    document.getElementById("body").removeChild(document.getElementsByTagName("canvas")[0]);
+    document.getElementsByClassName("error")[0].setAttribute("class","error active");
+    setTimeout( function() {
+      location.reload();
+    }, 5000);
+  };
 
   ws.onmessage = function(res) {
     messages = res.data;
@@ -54,14 +87,12 @@ background-size:16px 16px;
               }
             }
           }
-          Draw.update();
           break;
 
         case 'new_entity':
           if (Draw.matrices === undefined) return;
           Draw.matrices[v.x][v.y].content.push(v.data);
           Entities[v.data.object_id] = v.data;
-          Draw.update();
           break;
 
         case 'destroy_entity':
@@ -69,7 +100,6 @@ background-size:16px 16px;
           var a = Entities[v.object_id];
           Draw.destroy(a);
           delete Entities[v.object_id];
-          Draw.update();
           break;
 
         case 'move_entity':
@@ -77,17 +107,19 @@ background-size:16px 16px;
           Draw.destroy( Entities[v.object_id] );
           Entities[v.object_id].pos = {x: v.x, y: v.y};
           Draw.matrices[v.x][v.y].content.push( Entities[v.object_id] );
-          Draw.update();
           break;
 
         case 'update_entity':
           if (Draw.matrices === undefined) return;
           Entities[v.object_id] = v.data;
-          Draw.update();
           break;
       }
+
+      Draw.update();
     }
 
   }
 </script>
+
+</body>
 </html>
