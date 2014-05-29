@@ -78,8 +78,11 @@ var Draw = {
               );
               break;
             case "player":
+	      var dir = "none";
+	      if (typeof el.direction == "string") dir = el.direction;
+              if (typeof el.direction == "object" && el.direction.length > 0) dir = el.direction[0];
               Draw.ctx.drawImage(
-                Draw.assets.player[ el.direction[0] || "none" ],
+                Draw.assets.player[ "none" ],
                 Draw.assets.blocks.width*i,
                 Draw.assets.blocks.height*j-66
               );
