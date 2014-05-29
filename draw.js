@@ -29,8 +29,8 @@ var Draw = {
     Draw.canvas = document.createElement("canvas");
     Draw.ctx = Draw.canvas.getContext("2d");
 
-    Draw.canvas.setAttribute('width', 1000);
-    Draw.canvas.setAttribute('height', 900);
+    Draw.canvas.setAttribute('width', 1);
+    Draw.canvas.setAttribute('height', 1);
 
     Draw.assets.blocks.solid.src = "img/SolidBlock.png";
     Draw.assets.blocks.tile.src = "img/BackgroundTile.png";
@@ -45,6 +45,11 @@ var Draw = {
     Draw.assets.fire.src = "img/fire.png";
 
     body.appendChild( Draw.canvas );
+  },
+
+  resize: function(N, M) {
+    Draw.canvas.setAttribute('width', N*this.assets.blocks.width);
+    Draw.canvas.setAttribute('height', M*this.assets.blocks.height);
   },
 
   update: function() {
@@ -99,4 +104,9 @@ var Draw = {
     }
   },
 
+  destroy: function(a) {
+    Draw.matrices[a.pos.x][a.pos.y].content.splice(
+      Draw.matrices[a.pos.x][a.pos.y].content.indexOf(a)
+    ,1);
+  },
 }

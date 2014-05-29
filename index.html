@@ -1,6 +1,23 @@
 <html>
 <head>
   <script src="draw.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+background:
+radial-gradient(black 15%, transparent 16%) 0 0,
+radial-gradient(black 15%, transparent 16%) 8px 8px,
+radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+background-color:#282828;
+background-size:16px 16px;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 
 <body id="body">
@@ -9,6 +26,7 @@
 <script>
   var ws = new WebSocket('ws://localhost:62421/');
   var Entities = {};
+
   Draw.init();
 
   ws.onmessage = function(res) {
@@ -27,6 +45,7 @@
 
       switch (v.event) {
         case 'game':
+          Draw.resize(v.game_rules.sizeN, v.game_rules.sizeM);
           Draw.matrices = v.game_state;
           for (var i = 0, il = Draw.matrices.length; i < il; ++i) {
             for (var j = 0, jl = Draw.matrices[i].length; j < jl; ++j) {
@@ -39,24 +58,30 @@
           break;
 
         case 'new_entity':
+          if (Draw.matrices === undefined) return;
           Draw.matrices[v.x][v.y].content.push(v.data);
           Entities[v.data.object_id] = v.data;
           Draw.update();
           break;
 
         case 'destroy_entity':
+          if (Draw.matrices === undefined) return;
           var a = Entities[v.object_id];
-          Draw.matrices[a.pos.x][a.pos.y].content.splice(
-            Draw.matrices[a.pos.x][a.pos.y].content.indexOf(a)
-              ,1);
+          Draw.destroy(a);
           delete Entities[v.object_id];
           Draw.update();
           break;
 
         case 'move_entity':
+          if (Draw.matrices === undefined) return;
+          Draw.destroy( Entities[v.object_id] );
+          Entities[v.object_id].pos = {x: v.x, y: v.y};
+          Draw.matrices[v.x][v.y].content.push( Entities[v.object_id] );
+          Draw.update();
           break;
 
         case 'update_entity':
+          if (Draw.matrices === undefined) return;
           Entities[v.object_id] = v.data;
           Draw.update();
           break;
