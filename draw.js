@@ -29,6 +29,7 @@ var Draw = {
     Draw.canvas = document.createElement("canvas");
     Draw.ctx = Draw.canvas.getContext("2d");
 
+
     Draw.canvas.setAttribute('width', 1);
     Draw.canvas.setAttribute('height', 1);
 
@@ -81,6 +82,13 @@ var Draw = {
                 Draw.assets.player[ el.direction ],
                 Draw.assets.blocks.width*i,
                 Draw.assets.blocks.height*j-66
+              );
+              Draw.ctx.font="bold 14px sans-serif";
+              Draw.ctx.textAlign = "center";
+              Draw.ctx.fillText(
+                el.name,
+                Draw.assets.blocks.width*i + Draw.assets.blocks.width/2,
+                Draw.assets.blocks.height*j-40
               );
               break;
             case "bomb":
