@@ -79,7 +79,7 @@ var Draw = {
               break;
             case "player":
               Draw.ctx.drawImage(
-                Draw.assets.player[ el.direction ],
+                Draw.assets.player[ el.direction[0] || "none" ],
                 Draw.assets.blocks.width*i,
                 Draw.assets.blocks.height*j-66
               );
