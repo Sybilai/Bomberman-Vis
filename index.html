@@ -1,20 +1,21 @@
 <html>
 <head>
+  <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.1.0.min.js"></script>
   <script src="draw.js"></script>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-background:
-radial-gradient(black 15%, transparent 16%) 0 0,
-radial-gradient(black 15%, transparent 16%) 8px 8px,
-radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
-radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
-background-color:#282828;
-background-size:16px 16px;
+      background:
+      radial-gradient(black 15%, transparent 16%) 0 0,
+      radial-gradient(black 15%, transparent 16%) 8px 8px,
+      radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+      radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+      background-color:#282828;
+      background-size:16px 16px;
     }
-    canvas {
-      display: block;
+    #container > div {
+      display: block !important;
       margin: 0 auto;
     }
     .error {
@@ -43,19 +44,16 @@ background-size:16px 16px;
 
 <body id="body">
   <div class="error">Connection can't be created. This page will refresh.</div>
-
+  <div id="container"></div>
 <script>
-  var ws = new WebSocket('ws://sybilai.com:62421/');
-  var Entities = {};
-
-  Draw.init();
+  Entities = {};
+  Draw.loadImages(function() {
+  var ws = new WebSocket('ws://localhost:62421/');
 
   ws.onopen = function(res) {
-    console.log(res);
   };
 
   ws.onclose = function() {
-    document.getElementById("body").removeChild(document.getElementsByTagName("canvas")[0]);
     document.getElementsByClassName("error")[0].setAttribute("class","error active");
     setTimeout( function() {
       location.reload();
@@ -78,47 +76,34 @@ background-size:16px 16px;
 
       switch (v.event) {
         case 'game':
-          Draw.resize(v.game_rules.sizeN, v.game_rules.sizeM);
+          Draw.init(v.game_rules.sizeN, v.game_rules.sizeM);
           Draw.matrices = v.game_state;
-          for (var i = 0, il = Draw.matrices.length; i < il; ++i) {
-            for (var j = 0, jl = Draw.matrices[i].length; j < jl; ++j) {
-              for (var c = 0, cl = Draw.matrices[i][j].content.length; c < cl; ++c) {
-                Entities[ Draw.matrices[i][j].content[c].object_id ] = Draw.matrices[i][j].content[c];
-              }
-            }
-          }
+          Draw.initDraw();
           break;
 
         case 'new_entity':
-          if (Draw.matrices === undefined) return;
-          Draw.matrices[v.x][v.y].content.push(v.data);
-          Entities[v.data.object_id] = v.data;
+          Draw.drawEl(v.data);
           break;
 
         case 'destroy_entity':
-          if (Draw.matrices === undefined) return;
-          var a = Entities[v.object_id];
-          Draw.destroy(a);
+          Entities[v.object_id].obj.remove();
           delete Entities[v.object_id];
           break;
 
         case 'move_entity':
-          if (Draw.matrices === undefined) return;
-          Draw.destroy( Entities[v.object_id] );
+          Draw.moveEl(v.object_id, v.x, v.y);
           Entities[v.object_id].pos = {x: v.x, y: v.y};
-          Draw.matrices[v.x][v.y].content.push( Entities[v.object_id] );
           break;
-
+/*
         case 'update_entity':
           if (Draw.matrices === undefined) return;
           Entities[v.object_id] = v.data;
-          break;
+          break;*/
       }
-
       Draw.update();
     }
-
   }
+  });
 </script>
 
 </body>

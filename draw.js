@@ -1,6 +1,14 @@
 var Draw = {
   ctx: undefined,
   canvas: undefined,
+  stage: undefined,
+  layers: {
+    green: undefined,
+    fixblocks: undefined,
+    blocks: undefined,
+    players: undefined,
+    bombs: undefined
+  },
 
   matrices: undefined,
 
@@ -15,104 +23,226 @@ var Draw = {
     bomb: new Image(),
     fire: new Image(),
 
-    player: {
-      left: new Image(),
-      right: new Image(),
-      up: new Image(),
-      down: new Image(),
-      none: new Image()
-    }
+    player: new Image()
   },
 
-  init: function() {
-    var body = document.getElementById("body");
-    Draw.canvas = document.createElement("canvas");
-    Draw.ctx = Draw.canvas.getContext("2d");
-
-
-    Draw.canvas.setAttribute('width', 1);
-    Draw.canvas.setAttribute('height', 1);
-
+  loadImages: function(callback) {
     Draw.assets.blocks.solid.src = "img/SolidBlock.png";
     Draw.assets.blocks.tile.src = "img/BackgroundTile.png";
 
-    Draw.assets.player.left.src = "img/player_left.png";
-    Draw.assets.player.right.src = "img/player_right.png";
-    Draw.assets.player.up.src = "img/player_back.png";
-    Draw.assets.player.down.src = "img/player_front.png";
-    Draw.assets.player.none.src = "img/player_front.png";
+    Draw.assets.player.src = "img/player.png";
 
     Draw.assets.bomb.src = "img/bomb.png";
     Draw.assets.fire.src = "img/fire.png";
-
-    body.appendChild( Draw.canvas );
+    Draw.assets.fire.onload = callback;
   },
 
-  resize: function(N, M) {
-    Draw.canvas.setAttribute('width', N*this.assets.blocks.width);
-    Draw.canvas.setAttribute('height', M*this.assets.blocks.height);
+  init: function(N, M) {
+    Draw.stage = new Kinetic.Stage({
+      container: 'container',
+      width: N*Draw.assets.blocks.width,
+      height: M*this.assets.blocks.height
+    });
+
+    Draw.layers.green = new Kinetic.Layer();
+    Draw.layers.fixblocks = new Kinetic.Layer();
+    Draw.layers.blocks = new Kinetic.Layer();
+    Draw.layers.players = new Kinetic.Layer();
+    Draw.layers.bombs = new Kinetic.Layer();
+
+    Draw.assets.fire.onload = function() {
+      Draw.update();
+    }
   },
 
   update: function() {
-    Draw.ctx.clearRect(0, 0, Draw.canvas.width, Draw.canvas.height);
-    Draw.draw();
+    Draw.stage.clear();
+    Draw.stage.add(Draw.layers.green);
+    Draw.stage.add(Draw.layers.fixblocks);
+    Draw.stage.add(Draw.layers.blocks);
+    Draw.stage.add(Draw.layers.players);
+    Draw.stage.add(Draw.layers.bombs);
   },
 
-  draw: function() {
+  initDraw: function() {
     for (var i = 0, _ilen = Draw.matrices.length; i < _ilen; ++i) {
       for (var j = 0, _jlen = Draw.matrices[i].length; j < _jlen; ++j) {
-        Draw.ctx.drawImage(
-          Draw.assets.blocks.tile,
-          Draw.assets.blocks.width*i,
-          Draw.assets.blocks.height*j
-        );
+        Draw.layers.green.add(new Kinetic.Image({
+          image: Draw.assets.blocks.tile,
+          x: Draw.assets.blocks.width*i,
+          y: Draw.assets.blocks.height*j
+        }));
 
         for (var c = 0, _clen = Draw.matrices[i][j].content.length; c < _clen; ++c) {
-          var el = Draw.matrices[i][j].content[c];
-          switch (el.type) {
-            case 'fixblock':
-              Draw.ctx.drawImage(
-                Draw.assets.blocks.solid,
-                Draw.assets.blocks.width*i,
-                Draw.assets.blocks.height*j
-              );
-              break;
-            case "player":
-	      var dir = "none";
-	      if (typeof el.direction == "string") dir = el.direction;
-              if (typeof el.direction == "object" && el.direction.length > 0) dir = el.direction[0];
-              Draw.ctx.drawImage(
-                Draw.assets.player[ "none" ],
-                Draw.assets.blocks.width*i,
-                Draw.assets.blocks.height*j-66
-              );
-              Draw.ctx.font="bold 14px sans-serif";
-              Draw.ctx.textAlign = "center";
-              Draw.ctx.fillText(
-                el.name,
-                Draw.assets.blocks.width*i + Draw.assets.blocks.width/2,
-                Draw.assets.blocks.height*j-40
-              );
-              break;
-            case "bomb":
-              Draw.ctx.drawImage(
-                Draw.assets.bomb,
-                Draw.assets.blocks.width*i+8,
-                Draw.assets.blocks.height*j+8
-              );
-              break;
-            case "flame":
-              Draw.ctx.drawImage(
-                Draw.assets.fire,
-                Draw.assets.blocks.width*i+8,
-                Draw.assets.blocks.height*j+8
-              );
-              break;
-          }
+          Draw.drawEl( Draw.matrices[i][j].content[c] );
         }
-
       }
     }
+  },
+
+  drawEl: function(el) {
+    Entities[ el.object_id ] = el;
+    switch (el.type) {
+      case 'fixblock':
+        el.obj = new Kinetic.Image({
+          image: Draw.assets.blocks.solid,
+          x: Draw.assets.blocks.width*el.pos.x,
+          y: Draw.assets.blocks.height*el.pos.y
+        });
+        Draw.layers.fixblocks.add( el.obj );
+        break;
+      case "player":
+        el.obj = new Kinetic.Sprite({
+          x: Draw.assets.blocks.width*el.pos.x+7,
+          y: Draw.assets.blocks.height*el.pos.y-30,
+          image: Draw.assets.player,
+          animation: "none",
+          animations: {
+            none: [
+              351,89,48,86
+            ],
+            up: [
+              1,89,48,86,
+              51,89,48,86,
+              101,89,48,86,
+              151,89,48,86,
+              1,89,48,86,
+              201,89,48,86,
+              251,89,48,86,
+              301,89,48,86
+            ],
+            down: [
+              351,89,48,86,
+              1,177,48,86,
+              51,177,48,86,
+              101,177,48,86,
+              151,177,48,86,
+              201,177,48,86,
+              251,177,48,86,
+              301,177,48,86
+            ],
+            left: [
+              351,177,48,86,
+              1,265,48,86,
+              51,265,48,86,
+              101,265,48,86,
+              151,265,48,86,
+              201,265,48,86,
+              251,265,48,86,
+              301,265,48,86
+            ],
+            right: [
+              1,1,48,86,
+              51,1,48,86,
+              101,1,48,86,
+              151,1,48,86,
+              201,1,48,86,
+              251,1,48,86,
+              301,1,48,86,
+              351,1,48,86
+            ]
+          },
+          frameRate: 60,
+          frameIndex: 0
+        });
+        Draw.layers.players.add( el.obj );
+        /*Draw.ctx.font="bold 14px sans-serif";
+        Draw.ctx.textAlign = "center";
+        Draw.ctx.fillText(
+          el.name,
+          Draw.assets.blocks.width*i + Draw.assets.blocks.width/2,
+          Draw.assets.blocks.height*j-40
+        );*/
+        break;
+      case "bomb":
+        el.obj = new Kinetic.Image({
+          image: Draw.assets.bomb,
+          x: Draw.assets.blocks.width*el.pos.x+8,
+          y: Draw.assets.blocks.height*el.pos.y+8
+        });
+        Draw.layers.bombs.add( el.obj );
+        break;
+      case "flame":
+        el.obj = new Kinetic.Image({
+          image: Draw.assets.fire,
+          x: Draw.assets.blocks.width*el.pos.x+8,
+          y: Draw.assets.blocks.height*el.pos.y+8
+        });
+        Draw.layers.bombs.add( el.obj );
+        break;
+    }
+    if (el.obj.start) el.obj.start();
+  },
+
+  moveEl: function(id, _x, _y) {
+    // I hate this function
+
+    var v = Entities[id];
+    var d = {
+      x: (_x - v.pos.x)*Draw.assets.blocks.width,
+      y: (_y - v.pos.y)*Draw.assets.blocks.height
+    };
+
+    var target = {
+      x: Math.abs(d.x),
+      y: Math.abs(d.y)
+    };
+
+    var layer;
+
+    switch (v.type) {
+      case 'fixblock':
+        layer = "fixblocks";
+      break;
+      case 'player':
+        layer = "players";
+        break;
+      case 'bomb':
+        layer = "bombs";
+        break;
+      case 'flame':
+        layer = "bombs";
+      break;
+    }
+
+    var anim = new Kinetic.Animation(function(frame) {
+      var q = d.x * (frame.timeDiff/150);
+      var w = d.y * (frame.timeDiff/150);
+      target.x -= Math.abs(q);
+      target.y -= Math.abs(w);
+      if (target.x < 0) {
+        if (q < 0) { q -= target.x; }
+        else { q += target.x; }
+      }
+      if (target.y < 0) {
+        if (w < 0) { w -= target.y; }
+        else { w += target.y; }
+      }
+      v.obj.setX( v.obj.getX() + q);
+      v.obj.setY( v.obj.getY() + w);
+      if (target.x <= 0 && target.y <= 0) {
+        this.stop();
+        if (v.obj.stop) {
+          v.obj.stop();
+          v.obj.animation("none");
+        }
+        v.pos = { x: _x, y: _y };
+      }
+    }, Draw.layers[layer]);
+
+    if (v.obj.stop) {
+      v.obj.stop();
+      if (_y < v.pos.y) {
+        v.obj.animation("up");
+      } else if (_y > v.pos.y) {
+        v.obj.animation("down");
+      } else if (_x < v.pos.x) {
+        v.obj.animation("left");
+      } else if (_x > v.pos.x) {
+        v.obj.animation("right");
+      }
+    }
+    anim.start();
   },
 
   destroy: function(a) {
