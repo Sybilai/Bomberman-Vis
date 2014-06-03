@@ -57,12 +57,6 @@ var Draw = {
     Draw.stage.add(Draw.layers.bombs);
   },
 
-  update: function() {
-    Draw.layers.blocks.draw();
-    Draw.layers.players.draw();
-    Draw.layers.bombs.draw();
-  },
-
   initDraw: function() {
     for (var i = 0, _ilen = Draw.matrices.length; i < _ilen; ++i) {
       for (var j = 0, _jlen = Draw.matrices[i].length; j < _jlen; ++j) {
