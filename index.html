@@ -48,39 +48,48 @@
 <script>
   Entities = {};
   Draw.loadImages(function() {
-  var ws = new WebSocket('ws://localhost:62421/');
+    var ws = new WebSocket('ws://sybilai.com:62421/');
 
-  ws.onopen = function(res) {
-  };
+    ws.onopen = function(res) {
+    };
 
-  ws.onclose = function() {
-    document.getElementsByClassName("error")[0].setAttribute("class","error active");
-    setTimeout( function() {
-      location.reload();
-    }, 5000);
-  };
+    ws.onclose = function() {
+      document.getElementsByClassName("error")[0].setAttribute("class","error active");
+      setTimeout( function() {
+        location.reload();
+      }, 5000);
+    };
 
-  ws.onmessage = function(res) {
-    messages = res.data;
-    messages = messages.split('\n');
-    messages.pop();
-
-    while (messages.length) {
-      var v = messages.shift();
+    ws.onmessage = function(res) {
+      var message = res.data;
+      message = message.split('\n');
+      message.pop();
+      message = message[0];
 
       try {
-        v = JSON.parse(v);
+        message = JSON.parse(message);
       } catch (e) {
-        continue;
+        return;
       }
 
-      switch (v.event) {
+      switch (message.event) {
         case 'game':
-          Draw.init(v.game_rules.sizeN, v.game_rules.sizeM);
-          Draw.matrices = v.game_state;
+          Draw.init(message.game_rules.sizeN, message.game_rules.sizeM);
+          Draw.game_rules = message.game_rules;
+          Draw.matrices = message.game_state;
           Draw.initDraw();
           break;
+        case 'frame':
+          executeFrame(message.frame);
+          break;
+      }
+    }
+  });
 
+  function executeFrame(messages) {
+    while (messages.length) {
+      var v = messages.shift();
+      switch (v.event) {
         case 'new_entity':
           Draw.drawEl(v.data);
           break;
@@ -103,7 +112,6 @@
       Draw.update();
     }
   }
-  });
 </script>
 
 </body>

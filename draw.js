@@ -21,7 +21,7 @@ var Draw = {
     },
 
     bomb: new Image(),
-    fire: new Image(),
+    flame: new Image(),
 
     player: new Image()
   },
@@ -33,8 +33,8 @@ var Draw = {
     Draw.assets.player.src = "img/player.png";
 
     Draw.assets.bomb.src = "img/bomb.png";
-    Draw.assets.fire.src = "img/fire.png";
-    Draw.assets.fire.onload = callback;
+    Draw.assets.flame.src = "img/flame.png";
+    Draw.assets.flame.onload = callback;
   },
 
   init: function(N, M) {
@@ -50,18 +50,17 @@ var Draw = {
     Draw.layers.players = new Kinetic.Layer();
     Draw.layers.bombs = new Kinetic.Layer();
 
-    Draw.assets.fire.onload = function() {
-      Draw.update();
-    }
-  },
-
-  update: function() {
-    Draw.stage.clear();
     Draw.stage.add(Draw.layers.green);
     Draw.stage.add(Draw.layers.fixblocks);
     Draw.stage.add(Draw.layers.blocks);
     Draw.stage.add(Draw.layers.players);
     Draw.stage.add(Draw.layers.bombs);
+  },
+
+  update: function() {
+    Draw.layers.blocks.draw();
+    Draw.layers.players.draw();
+    Draw.layers.bombs.draw();
   },
 
   initDraw: function() {
@@ -78,6 +77,7 @@ var Draw = {
         }
       }
     }
+    Draw.stage.draw();
   },
 
   drawEl: function(el) {
@@ -163,10 +163,22 @@ var Draw = {
         Draw.layers.bombs.add( el.obj );
         break;
       case "flame":
-        el.obj = new Kinetic.Image({
-          image: Draw.assets.fire,
+        el.obj = new Kinetic.Sprite({
+          image: Draw.assets.flame,
           x: Draw.assets.blocks.width*el.pos.x+8,
-          y: Draw.assets.blocks.height*el.pos.y+8
+          y: Draw.assets.blocks.height*el.pos.y+8,
+          animation: "flame",
+          animations: {
+            flame: [
+              2,2,48,4,
+              52,2,48,48,
+              102,2,48,48,
+              152,2,48,48,
+              202,2,48,48
+            ]
+          },
+          frameRate: 4,
+          frameIndex: 1
         });
         Draw.layers.bombs.add( el.obj );
         break;
@@ -175,8 +187,19 @@ var Draw = {
   },
 
   moveEl: function(id, _x, _y) {
-    // I hate this function
+    var v = Entities[id];
+    switch(v.type) {
+      default:
+        v.obj.move({
+          x: (_x - v.pos.x)*Draw.assets.blocks.width,
+          y: (_y - v.pos.y)*Draw.assets.blocks.height
+        });
+        v.pos = {x: _x, y: _y};
+        break;
+    }
+  },
 
+  animEl: function(id, _x, _y, layer) {
     var v = Entities[id];
     var d = {
       x: (_x - v.pos.x)*Draw.assets.blocks.width,
@@ -187,23 +210,6 @@ var Draw = {
       x: Math.abs(d.x),
       y: Math.abs(d.y)
     };
-
-    var layer;
-
-    switch (v.type) {
-      case 'fixblock':
-        layer = "fixblocks";
-      break;
-      case 'player':
-        layer = "players";
-        break;
-      case 'bomb':
-        layer = "bombs";
-        break;
-      case 'flame':
-        layer = "bombs";
-      break;
-    }
 
     var anim = new Kinetic.Animation(function(frame) {
       var q = d.x * (frame.timeDiff/150);
