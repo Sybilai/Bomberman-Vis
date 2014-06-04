@@ -136,17 +136,24 @@ var Draw = {
               351,1,48,86
             ]
           },
-          frameRate: 60,
+          frameRate: 5,
           frameIndex: 0
         });
         Draw.layers.players.add( el.obj );
-        /*Draw.ctx.font="bold 14px sans-serif";
-        Draw.ctx.textAlign = "center";
-        Draw.ctx.fillText(
-          el.name,
-          Draw.assets.blocks.width*i + Draw.assets.blocks.width/2,
-          Draw.assets.blocks.height*j-40
-        );*/
+
+        el.text = new Kinetic.Text({
+          x: el.obj.getX()-15,
+          y: el.obj.getY()-20,
+          text: el.name,
+          width: 80,
+          height: 15,
+          fontSize: 14,
+          fontStyle: 'bold',
+          fontFamily: 'sans-serif',
+          fill: '#fff',
+          align: 'center'
+        });
+        Draw.layers.players.add( el.text );
         break;
       case "bomb":
         el.obj = new Kinetic.Image({
@@ -183,6 +190,11 @@ var Draw = {
   moveEl: function(id, _x, _y) {
     var v = Entities[id];
     switch(v.type) {
+      case "player":
+        v.text.move({
+          x: (_x - v.pos.x)*Draw.assets.blocks.width,
+          y: (_y - v.pos.y)*Draw.assets.blocks.height
+        });
       default:
         v.obj.move({
           x: (_x - v.pos.x)*Draw.assets.blocks.width,

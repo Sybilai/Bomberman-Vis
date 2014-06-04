@@ -1,6 +1,6 @@
 <html>
 <head>
-  <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.1.0.min.js"></script>
+  <script src="kinetic-v5.1.0.min.js"></script>
   <script src="draw.js"></script>
   <style>
     html, body {
@@ -96,6 +96,9 @@
 
         case 'destroy_entity':
           Entities[v.object_id].obj.remove();
+          if (Entities[v.object_id].text) {
+            Entities[v.object_id].text.remove();
+          }
           delete Entities[v.object_id];
           break;
 
