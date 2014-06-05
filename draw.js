@@ -44,6 +44,8 @@ var Draw = {
       height: M*this.assets.blocks.height
     });
 
+    Draw.resize();
+
     Draw.layers.green = new Kinetic.Layer();
     Draw.layers.fixblocks = new Kinetic.Layer();
     Draw.layers.blocks = new Kinetic.Layer();
@@ -55,6 +57,11 @@ var Draw = {
     Draw.stage.add(Draw.layers.blocks);
     Draw.stage.add(Draw.layers.players);
     Draw.stage.add(Draw.layers.bombs);
+  },
+
+  resize: function() {
+    var x = window.innerWidth / document.getElementsByClassName("kineticjs-content")[0].offsetWidth;
+    document.getElementById("container").style.zoom = Math.min(1, x);
   },
 
   initDraw: function() {
