@@ -169,6 +169,7 @@ var Draw = {
           y: Draw.assets.blocks.height*el.pos.y+8
         });
         Draw.layers.bombs.add( el.obj );
+        Draw.layers.bombs.draw();
         break;
       case "flame":
         el.obj = new Kinetic.Sprite({
